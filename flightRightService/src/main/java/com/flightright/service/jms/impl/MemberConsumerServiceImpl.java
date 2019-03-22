@@ -5,7 +5,11 @@
  */
 package com.flightright.service.jms.impl;
 
+import com.flightright.persistence.model.Member;
+import com.flightright.service.MemberService;
 import com.flightright.service.jms.MemberConsumerService;
+import static com.flightright.service.util.Util.convertStringToObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 
@@ -15,23 +19,33 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MemberConsumerServiceImpl implements MemberConsumerService {
+    
+    private final MemberService memberService;
+    
+    @Autowired
+    public MemberConsumerServiceImpl(MemberService memberService) {
+        this.memberService = memberService;
+    }
 
     @Override
     @JmsListener(destination = "${flightright.activemq-save-member-topic}", containerFactory = "containerFactory")
     public void saveMember(String payload) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Member member = convertStringToObject(payload, Member.class);
+        memberService.saveMember(member);
     }
 
     @Override
     @JmsListener(destination = "${flightright.activemq-update-member-topic}", containerFactory = "containerFactory")
     public void updateMember(String payload) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Member member = convertStringToObject(payload, Member.class);
+        memberService.saveMember(member);
     }
 
     @Override
     @JmsListener(destination = "${flightright.activemq-delete-member-topic}", containerFactory = "containerFactory")
     public void deleteMember(String payload) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Member member = convertStringToObject(payload, Member.class);
+        memberService.deleteMember(member.getId());
     }
     
 }
