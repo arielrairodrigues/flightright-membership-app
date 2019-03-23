@@ -110,4 +110,10 @@ public class ApplicationProperty {
      */
     @NotBlank
     private String picturesFolder = "c:/flightright/members/pictures";
+    
+    private long maxPictureSize = 1048576;
+    
+    private long maxFileSize = 3145728;
+    
+    private long maxRequestSize = 5242880;
 }

@@ -20,17 +20,34 @@ public interface FileProcessorService {
     void createPicturesFolder(String picturesPath);
     
     /**
-     * Stores a member picture 
+     * Store a picture
      * @param file
-     * @param picturePath 
+     * @param fileDetails
+     * @param picturePath
+     * @return 
      */
-    void storePicture(InputStream file, String picturePath);
+    String storePicture(InputStream file, String[] fileDetails, String picturePath);
     
     /**
-     * Updates a member picture
+     * Update a picture
      * @param file
      * @param oldFileName
-     * @param picturePath 
+     * @param picturePath
+     * @return 
      */
-    void updatePicture(InputStream file, String oldFileName, String picturePath);
+    boolean updatePicture(InputStream file, String oldFileName, String picturePath);
+    
+    /**
+     * Renames a file
+     * @param fileDetails
+     * @return 
+     */
+    String renameFile(String[] fileDetails);
+    
+    /**
+     * Delete a member's picture
+     * @param fileName
+     * @return 
+     */
+    boolean deletePicture(String fileName);
 }
