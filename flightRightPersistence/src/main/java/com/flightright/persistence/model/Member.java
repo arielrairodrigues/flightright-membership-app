@@ -5,6 +5,8 @@
  */
 package com.flightright.persistence.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.flightright.persistence.serializer.PictureSerializer;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
@@ -52,6 +54,7 @@ public class Member extends TimestampMapper implements Serializable {
     private String postalCode;
     
     @Column(length = 200)
+    @JsonSerialize(using = PictureSerializer.class)
     private String picture;
     
     public Member(Builder builder) {

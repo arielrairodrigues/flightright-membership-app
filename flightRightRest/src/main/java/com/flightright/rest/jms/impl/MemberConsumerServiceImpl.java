@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.flightright.service.jms.impl;
+package com.flightright.rest.jms.impl;
 
 import com.flightright.persistence.model.Member;
+import com.flightright.rest.jms.MemberConsumerService;
+import static com.flightright.rest.util.Util.convertStringToObject;
 import com.flightright.service.MemberService;
-import com.flightright.service.jms.MemberConsumerService;
-import static com.flightright.service.util.Util.convertStringToObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;

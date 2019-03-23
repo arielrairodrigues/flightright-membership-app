@@ -104,4 +104,10 @@ public class ApplicationProperty {
      */
     @NotBlank
     private String activemqDeleteMemberTopic = "delete-member";
+    
+    /**
+     * The folder for the storage members pictures
+     */
+    @NotBlank
+    private String picturesFolder = "c:/flightright/members/pictures";
 }

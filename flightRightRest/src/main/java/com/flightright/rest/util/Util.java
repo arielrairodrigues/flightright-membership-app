@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.flightright.service.util;
+package com.flightright.rest.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
@@ -17,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class Util {
     
-    private Util() {} // prevent this class from being initialized
+    private Util() {} // prevents this class from being initialized
     
     /**
      * Converts an object to string
@@ -51,5 +52,11 @@ public final class Util {
             log.error("Unable to parse json string {}", data, e);
         }
         return null;
+    }
+    
+    public static boolean validFileExtension(MultipartFile file) {
+        String extension = file.getOriginalFilename().split("\\.")[1];
+        return (null != extension && !extension.trim().isEmpty() && 
+                                    (extension.trim().equalsIgnoreCase("jpg") || extension.trim().equalsIgnoreCase("jpeg") || extension.trim().equalsIgnoreCase("png")));
     }
 }

@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.flightright.service.jms.impl;
+package com.flightright.rest.jms.impl;
 
-import com.flightright.service.jms.ProducerService;
+import com.flightright.rest.jms.ProducerService;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import org.apache.activemq.ScheduledMessage;

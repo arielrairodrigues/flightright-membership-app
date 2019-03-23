@@ -68,6 +68,18 @@
                     <groupId>org.apache.activemq</groupId>
                     <artifactId>activemq-kahadb-store</artifactId>
                 </dependency>
+                
+                <dependency>
+                    <artifactId>flightRightPersistence</artifactId>
+                    <groupId>com.flightright.persistence</groupId>
+                    <version>1.0</version>
+                </dependency>
+                
+                <dependency>
+                    <artifactId>flightRightService</artifactId>
+                    <groupId>com.flightright.service</groupId>
+                    <version>1.0</version>
+                </dependency>
 	</dependencies>
 
 	<build>
