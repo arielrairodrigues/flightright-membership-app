@@ -15,7 +15,8 @@ import lombok.Getter;
 public enum ResponseFormat {
     
     SUCCESSFUL("00", "Successful"),
-    PICTURE_ERROR("01", "Unbable to save picture, please try again");
+    PICTURE_ERROR("01", "Unbable to save picture, please try again"),
+    MEMBER_DOES_NOT_EXIST("02", "This member does not exist");
     
     @Getter
     private final String status;
