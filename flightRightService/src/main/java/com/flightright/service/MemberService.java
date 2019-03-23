@@ -6,6 +6,7 @@
 package com.flightright.service;
 
 import com.flightright.persistence.model.Member;
+import java.util.List;
 
 /**
  *
@@ -30,4 +31,10 @@ public interface MemberService {
      * @param id 
      */
     void deleteMember(Long id);
+    
+    /**
+     * Returns all the listed members
+     * @return 
+     */
+    List<Member> findAll();
 }

@@ -49,5 +49,5 @@ public interface FileProcessorService {
      * @param fileName
      * @return 
      */
-    boolean deletePicture(String fileName);
+    void deletePicture(String fileName);
 }

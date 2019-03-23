@@ -61,6 +61,7 @@ public class FileProcessorServiceImpl implements FileProcessorService{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /** {@inheritDoc} */
     @Override
     public String renameFile(String[] fileDetails) {
         return new StringBuilder(fileDetails[0]).append("_")
@@ -68,19 +69,20 @@ public class FileProcessorServiceImpl implements FileProcessorService{
                                                 .append(fileDetails[1]).toString();
     }
     
+    /** {@inheritDoc} */
     private String generateFilePrefix(int length, boolean useLetters, boolean useNumbers) {
         return RandomStringUtils.random(length, useLetters, useNumbers);
     }
 
+    /** {@inheritDoc} */
     @Override
-    public boolean deletePicture(String fileName) {
+    public void deletePicture(String fileName) {
         Path path = Paths.get(fileName);
         try {
-            return Files.deleteIfExists(path);
+            Files.deleteIfExists(path);
         } catch (IOException e) {
             log.error("Unable to delete the file {}", path, e);
         }
-        return false;
     }
     
 }

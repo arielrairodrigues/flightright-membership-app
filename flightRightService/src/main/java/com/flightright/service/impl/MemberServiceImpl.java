@@ -8,6 +8,7 @@ package com.flightright.service.impl;
 import com.flightright.persistence.model.Member;
 import com.flightright.persistence.repo.MemberRepo;
 import com.flightright.service.MemberService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,11 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public void deleteMember(Long id) {
         memberRepo.deleteById(id);
+    }
+
+    @Override
+    public List<Member> findAll() {
+        return memberRepo.findAll();
     }
     
 }
