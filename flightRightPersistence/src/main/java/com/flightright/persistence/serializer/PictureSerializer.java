@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,7 +18,7 @@ import org.springframework.stereotype.Component;
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @Component
-@ConditionalOnMissingBean
+//@ConditionalOnMissingBean
 public class PictureSerializer extends JsonSerializer<String> {
     
     @Value("${flightright.pictures-folder}")

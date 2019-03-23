@@ -8,11 +8,13 @@ package com.flightright.persistence.repo;
 import com.flightright.persistence.model.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
+@Repository
 public interface MemberRepo extends JpaRepository<Member, Long>, JpaSpecificationExecutor<Member> {
     
 }

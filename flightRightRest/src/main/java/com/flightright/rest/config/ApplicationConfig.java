@@ -7,10 +7,12 @@ package com.flightright.rest.config;
 
 import javax.servlet.MultipartConfigElement;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -21,6 +23,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 @Configuration
 @EnableConfigurationProperties(ApplicationProperty.class)
 @EnableTransactionManagement
+@EnableJpaRepositories("com.flightright.persistence")
+@EntityScan("com.flightright.persistence.model")
 public class ApplicationConfig {
     
     @Autowired
