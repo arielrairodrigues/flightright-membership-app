@@ -12,8 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Service;
@@ -47,8 +45,7 @@ public class FileProcessorServiceImpl implements FileProcessorService{
         try {
             // create the pictures folder if it does not exist
             createPicturesFolder(picturePath);
-            Files.copy(file, Paths.get(picturePath, fileName), StandardCopyOption.REPLACE_EXISTING);
-            return fileName;
+            return saveImage(file, fileName, picturePath);
         } catch (IOException e) {
             log.error("Unable to save picture with name {}", fileName, e);
         }
@@ -57,8 +54,16 @@ public class FileProcessorServiceImpl implements FileProcessorService{
 
     /** {@inheritDoc} */
     @Override
-    public boolean updatePicture(InputStream file, String oldFileName, String picturePath) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public String updatePicture(InputStream file, String[] fileDetails, String oldFileName, String picturePath) {
+        String fileName = renameFile(fileDetails);
+        try {
+            Path path = Paths.get(oldFileName);
+            Files.deleteIfExists(path);
+            return saveImage(file, fileName, picturePath);
+        } catch (IOException e) {
+            log.error("Unable to update picture with file name {}", oldFileName, e);
+        }
+        return null;
     }
 
     /** {@inheritDoc} */
@@ -83,6 +88,11 @@ public class FileProcessorServiceImpl implements FileProcessorService{
         } catch (IOException e) {
             log.error("Unable to delete the file {}", path, e);
         }
+    }
+    
+    private String saveImage(InputStream file, String fileName, String pictureFolderpath) throws IOException {
+        Files.copy(file, Paths.get(pictureFolderpath, fileName), StandardCopyOption.REPLACE_EXISTING);
+        return fileName;
     }
     
 }

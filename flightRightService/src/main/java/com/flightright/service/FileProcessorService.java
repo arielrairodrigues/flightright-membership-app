@@ -29,13 +29,14 @@ public interface FileProcessorService {
     String storePicture(InputStream file, String[] fileDetails, String picturePath);
     
     /**
-     * Update a picture
+     * Update Picture
      * @param file
+     * @param fileDetails
      * @param oldFileName
      * @param picturePath
      * @return 
      */
-    boolean updatePicture(InputStream file, String oldFileName, String picturePath);
+    String updatePicture(InputStream file, String[] fileDetails, String oldFileName, String picturePath);
     
     /**
      * Renames a file
@@ -47,7 +48,6 @@ public interface FileProcessorService {
     /**
      * Delete a member's picture
      * @param fileName
-     * @return 
      */
     void deletePicture(String fileName);
 }

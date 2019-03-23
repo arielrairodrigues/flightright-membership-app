@@ -12,6 +12,7 @@ import com.flightright.persistence.model.Member;
 import com.flightright.rest.config.ApplicationProperty;
 import com.flightright.rest.jms.MemberConsumerService;
 import com.flightright.rest.resource.MemberResource;
+import com.flightright.rest.util.Util;
 import static com.flightright.rest.util.Util.convertObjectToJson;
 import com.flightright.service.FileProcessorService;
 import com.flightright.service.MemberService;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -104,7 +106,12 @@ public class MemberController {
         return memberService.findAll();
     }
     
-    @DeleteMapping(value = "/delete/{memberId}")
+    /**
+     * Delete a member
+     * @param id
+     * @return 
+     */
+    @DeleteMapping(value = "/delete/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Delete Member", notes = "This endpoint deletes the profile of an unused member", nickname = "Delete Member")
     public ResponseEntity deleteMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) {
         Member member = memberService.findMember(id);
@@ -113,6 +120,29 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.MEMBER_DOES_NOT_EXIST.getStatus(), ResponseFormat.MEMBER_DOES_NOT_EXIST.getMessage())));
         
         memberConsumerService.deleteMember(convertObjectToJson(member));
+        return ResponseEntity.ok(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.SUCCESSFUL.getStatus(), ResponseFormat.SUCCESSFUL.getMessage())));
+    }
+    
+    @PutMapping(value = "/update/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @ApiOperation(value = "Update Member", notes = "This endpoint updates the profile of a profiled member", nickname = "Update Member")
+    public ResponseEntity updateMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id,
+                                       @Valid @ModelAttribute MemberResource request) throws IOException {
+        
+        Member member = memberService.findMember(id);
+        if (null == member)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.MEMBER_DOES_NOT_EXIST.getStatus(), ResponseFormat.MEMBER_DOES_NOT_EXIST.getMessage())));
+        
+        // update picture
+        String fileName = fileProcessorService.updatePicture(request.getPicture().getInputStream(), 
+                                                             request.getPicture().getOriginalFilename().split("\\."),
+                                                             new StringBuilder(property.getPicturesFolder()).append("/").append(member.getPicture()).toString(),
+                                                             property.getPicturesFolder());
+        if (null == fileName)
+            return ResponseEntity.badRequest().body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.PICTURE_UPDATE_ERROR.getStatus(), ResponseFormat.PICTURE_UPDATE_ERROR.getMessage())));
+        
+        // send to the queue
+        Util.updateMember(member, request, fileName);
+        memberConsumerService.updateMember(convertObjectToJson(member));
         return ResponseEntity.ok(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.SUCCESSFUL.getStatus(), ResponseFormat.SUCCESSFUL.getMessage())));
     }
 }

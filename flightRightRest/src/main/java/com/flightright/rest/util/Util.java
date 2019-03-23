@@ -7,6 +7,8 @@ package com.flightright.rest.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.flightright.persistence.model.Member;
+import com.flightright.rest.resource.MemberResource;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,5 +60,13 @@ public final class Util {
         String extension = file.getOriginalFilename().split("\\.")[1];
         return (null != extension && !extension.trim().isEmpty() && 
                                     (extension.trim().equalsIgnoreCase("jpg") || extension.trim().equalsIgnoreCase("jpeg") || extension.trim().equalsIgnoreCase("png")));
+    }
+    
+    public static void updateMember(Member member, MemberResource request, String fileName) {
+        member.setDateOfBirth(request.getDateOfBirth());
+        member.setFirstName(request.getFirstName());
+        member.setLastName(request.getLastName());
+        member.setPicture(fileName);
+        member.setPostalCode(request.getPostalCode());
     }
 }
