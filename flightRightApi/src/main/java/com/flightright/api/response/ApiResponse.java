@@ -6,15 +6,17 @@
 package com.flightright.api.response;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 /**
  *
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @AllArgsConstructor
+@NoArgsConstructor
 public class ApiResponse extends Response {
-    private final String responseCode;
-    private final Object responseMessage;
+    private String responseCode;
+    private Object responseMessage;
 
     @Override
     public Object getResponseMessage() {
