@@ -11,6 +11,9 @@ import com.flightright.persistence.model.Member;
 import com.flightright.rest.resource.MemberResource;
 import com.flightright.rest.resource.UpdateMemberResource;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,5 +73,16 @@ public final class Util {
         if (null != fileName)
             member.setPicture(fileName);
         member.setPostalCode(request.getPostalCode());
+    }
+    
+    /**
+     * Mock the list of members
+     * @return 
+     */
+    public static List<Member> mockMembers() {
+        Member member = new Member(1L, "Nonso", "Megafu", null, "100212", "picture.jgp", null, null);
+        List<Member> members = new ArrayList<>();
+        members.add(member);
+        return members;
     }
 }

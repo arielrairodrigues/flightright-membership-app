@@ -19,7 +19,7 @@ import javax.validation.Payload;
  */
 @Documented
 @Constraint(validatedBy = ValidFileValidator.class)
-@Target( {ElementType.FIELD})
+@Target( {ElementType.FIELD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidFile {
     String message() default "Invalid file provided (must be jpg, jpeg or png)";

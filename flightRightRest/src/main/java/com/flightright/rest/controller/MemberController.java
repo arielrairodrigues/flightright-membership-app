@@ -23,6 +23,7 @@ import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import static java.util.stream.Collectors.toList;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
@@ -34,7 +35,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -51,7 +51,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/members")
-@Validated
 @Slf4j
 @Api(value = "Member-Controller", description = "To manage all the endpoints for membership", tags = {"Create Member, Read Member, Update Member, Delete Member"})
 public class MemberController {
@@ -81,6 +80,10 @@ public class MemberController {
     @PostMapping(value = "/create", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Create a new member", notes = "This endpoint manages the cretation of a new member", nickname = "Create Member")
     public ResponseEntity createMember(@Valid @ModelAttribute MemberResource request, BindingResult result) throws IOException {
+        // validate request
+        if (result.hasErrors())
+            return getErrorDetails(result);
+        
         // save picture
         String fileName = fileProcessorService.storePicture(request.getPicture().getInputStream(), request.getPicture().getOriginalFilename().split("\\."), property.getPicturesFolder());
         if (null == fileName)
@@ -103,7 +106,7 @@ public class MemberController {
      */
     @GetMapping(value = "/get/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Get Member", notes = "This endpoint returns a profiled member", nickname = "Get Member By ID")
-    public ResponseEntity getMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) {
+    public ResponseEntity getMember(@PathVariable("memberId") Long id) {
         Member member = memberService.findMember(id);
         if (null == member)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.MEMBER_DOES_NOT_EXIST.getStatus(), ResponseFormat.MEMBER_DOES_NOT_EXIST.getMessage())));
@@ -127,7 +130,7 @@ public class MemberController {
      */
     @DeleteMapping(value = "/delete/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Delete Member", notes = "This endpoint deletes the profile of an unused member", nickname = "Delete Member")
-    public ResponseEntity deleteMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) {
+    public ResponseEntity deleteMember(@PathVariable("memberId") Long id) {
         Member member = memberService.findMember(id);
         
         if (null == member)
@@ -142,7 +145,11 @@ public class MemberController {
     @ApiOperation(value = "Update Member", notes = "This endpoint updates the profile of a profiled member", nickname = "Update Member")
     public ResponseEntity updateMember(@Valid @ModelAttribute UpdateMemberResource request,
                                        BindingResult result,
-                                       @PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) throws IOException {
+                                       @PathVariable("memberId") Long id) throws IOException {
+        
+        // validate request
+        if (result.hasErrors())
+            return getErrorDetails(result);
         
         Member member = memberService.findMember(id);
         if (null == member)
@@ -167,5 +174,10 @@ public class MemberController {
         Util.updateMember(member, request, fileName);
         memberConsumerService.updateMember(convertObjectToJson(member));
         return ResponseEntity.ok(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.SUCCESSFUL.getStatus(), ResponseFormat.SUCCESSFUL.getMessage())));
+    }
+    
+    private ResponseEntity getErrorDetails(BindingResult result) {
+        List<String> errors = result.getAllErrors().parallelStream().map(e -> e.getDefaultMessage()).collect(toList());
+        return new ResponseEntity<>(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.FORMAT_ERROR.getStatus(), errors)), HttpStatus.BAD_REQUEST);
     }
 }

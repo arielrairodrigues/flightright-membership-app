@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.flightright.api.controller;
+package com.flightright.rest.controller;
 
 import com.flightright.rest.config.ApplicationProperty;
-import com.flightright.rest.controller.MemberController;
 import com.flightright.rest.jms.MemberConsumerService;
+import static com.flightright.rest.util.Util.convertObjectToJson;
+import static com.flightright.rest.util.Util.mockMembers;
 import com.flightright.service.FileProcessorService;
 import com.flightright.service.MemberService;
-import java.io.File;
 import java.io.IOException;
 import javax.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
@@ -28,9 +28,10 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import static org.junit.Assert.assertEquals;
+import org.junit.Ignore;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -41,6 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
  *
@@ -73,15 +75,13 @@ public class MemberControllerTest {
     
     private static final String FORM_NAME = "picture";
     private static final String FILE_NAME = "cert2.jpg";
-    private File file;
     private byte[] bytes;
     
     @Before
     public void setup() { 
         mvc = MockMvcBuilders.webAppContextSetup(wac).build();
-        file = new File(FILE_NAME);
         try {
-            bytes = FileUtils.readFileToByteArray(file);
+            bytes = IOUtils.toByteArray(this.getClass().getResource("/" + FILE_NAME));
         } catch (IOException ex) {
             log.error("Unable to write file to byte array", ex);
         }
@@ -89,6 +89,7 @@ public class MemberControllerTest {
     
     
     @Test
+//    @Ignore
     public void when_validMember_thenReturnOk() throws Exception {
         
         /**
@@ -103,10 +104,9 @@ public class MemberControllerTest {
         when(fileProcessorService.storePicture(any(), any(), any())).thenReturn(FILE_NAME);
         doNothing().when(memberConsumerService).saveMember(any());
         
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME,FILE_NAME,
-                                                            MediaType.MULTIPART_FORM_DATA_VALUE, bytes);
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, bytes);
         
-         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.fileUpload("/members/create")
+         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
                                                                         .file(mockMultipartFile)
                                                                         .param("dateOfBirth", "2021-09-06")
                                                                         .param("firstName", "ela333")
@@ -123,6 +123,43 @@ public class MemberControllerTest {
          // verify that the services are called
          verify(fileProcessorService, times(1)).storePicture(any(), any(), any());
          verify(memberConsumerService, times(1)).saveMember(any());
+         assertEquals(result.getResponse().getContentAsString(), res);
+    }
+    
+    /**
+     * Test get all members
+     * @throws Exception 
+     */
+    @Test
+    public void when_getAllMembers_thenReturnOk() throws Exception {
+        
+        /**
+         * [
+                {
+                    "id": 1,
+                    "firstName": "Nonso",
+                    "lastName": "Megafu",
+                    "dateOfBirth": null,
+                    "postalCode": "100212",
+                    "picture": "picture.jgp",
+                    "createdAt": null,
+                    "updatedAt": null
+                }
+            ]
+         */
+        String res = convertObjectToJson(mockMembers());
+        when(memberService.findAll()).thenReturn(mockMembers());
+        
+        MvcResult result = mvc.perform(get("/members/")
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andDo(print())
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .andExpect(jsonPath("$.[0].firstName", Matchers.is("Nonso")))
+                        .andExpect(jsonPath("$.[0].lastName", Matchers.is("Megafu"))).andReturn();
+        
+        // verify that the services are called
+         verify(memberService, times(1)).findAll();
          assertEquals(result.getResponse().getContentAsString(), res);
     }
 }
