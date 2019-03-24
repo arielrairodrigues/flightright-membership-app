@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Component;
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @Component
-//@ConditionalOnMissingBean
+@Slf4j
 public class PictureSerializer extends JsonSerializer<String> {
     
     @Value("${flightright.pictures-folder}")

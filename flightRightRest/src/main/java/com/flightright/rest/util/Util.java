@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flightright.persistence.model.Member;
 import com.flightright.rest.resource.MemberResource;
+import com.flightright.rest.resource.UpdateMemberResource;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
@@ -62,11 +63,12 @@ public final class Util {
                                     (extension.trim().equalsIgnoreCase("jpg") || extension.trim().equalsIgnoreCase("jpeg") || extension.trim().equalsIgnoreCase("png")));
     }
     
-    public static void updateMember(Member member, MemberResource request, String fileName) {
+    public static void updateMember(Member member, UpdateMemberResource request, String fileName) {
         member.setDateOfBirth(request.getDateOfBirth());
         member.setFirstName(request.getFirstName());
         member.setLastName(request.getLastName());
-        member.setPicture(fileName);
+        if (null != fileName)
+            member.setPicture(fileName);
         member.setPostalCode(request.getPostalCode());
     }
 }

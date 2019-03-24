@@ -18,11 +18,11 @@ import javax.validation.Payload;
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @Documented
-@Constraint(validatedBy = ValidFileValidator.class)
+@Constraint(validatedBy = ValidDateOfBirthValidator.class)
 @Target( {ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidFile {
-    String message() default "Invalid file provided (must be jpg, jpeg or png)";
+public @interface ValidDateOfBirth {
+    String message() default "Please provide a valid date of birth";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

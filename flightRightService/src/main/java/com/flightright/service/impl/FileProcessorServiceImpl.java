@@ -70,7 +70,7 @@ public class FileProcessorServiceImpl implements FileProcessorService{
     @Override
     public String renameFile(String[] fileDetails) {
         return new StringBuilder(fileDetails[0]).append("_")
-                                                .append(generateFilePrefix(12, true, true))
+                                                .append(generateFilePrefix(12, true, true)).append(".")
                                                 .append(fileDetails[1]).toString();
     }
     

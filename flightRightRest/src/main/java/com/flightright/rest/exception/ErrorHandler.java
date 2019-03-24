@@ -5,6 +5,9 @@
  */
 package com.flightright.rest.exception;
 import com.flightright.api.dto.ErrorDetail;
+import com.flightright.api.response.ApiResponseFactory;
+import com.flightright.api.response.ResponseFactory;
+import com.flightright.api.response.ResponseFormat;
 import java.util.Date;
 import java.util.Set;
 import static java.util.stream.Collectors.toSet;
@@ -27,14 +30,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ErrorHandler extends ResponseEntityExceptionHandler {
     
     @ExceptionHandler(Exception.class)
-    public final ResponseEntity<ErrorDetail> handleGlobalException(Exception ex, WebRequest request) {
+    public final ResponseEntity handleGlobalException(Exception ex, WebRequest request) {
       
       if (ex instanceof ConstraintViolationException) {
           Set<ConstraintViolation<?>> constraintViolation = ((ConstraintViolationException) ex).getConstraintViolations();
           Set<String> errors = constraintViolation.stream().map(v -> v.getMessage()).collect(toSet());
-          return new ResponseEntity<>(new ErrorDetail(new Date(), "Invalid Parameter(s) Provided", errors), HttpStatus.BAD_REQUEST);
+          return new ResponseEntity<>(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.FORMAT_ERROR.getStatus(), errors)), HttpStatus.BAD_REQUEST);
+//          return new ResponseEntity<>(new ErrorDetail(new Date(), "Invalid Parameter(s) Provided", errors), HttpStatus.BAD_REQUEST);
       } 
-      
+      log.error("Odikwa too much", ex);
       return new ResponseEntity<>(new ErrorDetail(new Date(), ex.getMessage(), request.getDescription(false)), HttpStatus.BAD_GATEWAY);
     }
 }

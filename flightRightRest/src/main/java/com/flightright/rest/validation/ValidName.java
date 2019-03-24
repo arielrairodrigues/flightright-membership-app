@@ -18,11 +18,11 @@ import javax.validation.Payload;
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @Documented
-@Constraint(validatedBy = ValidFileValidator.class)
+@Constraint(validatedBy = ValidNameValidator.class)
 @Target( {ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ValidFile {
-    String message() default "Invalid file provided (must be jpg, jpeg or png)";
+public @interface ValidName {
+    String message() default "Please provide a valid name";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

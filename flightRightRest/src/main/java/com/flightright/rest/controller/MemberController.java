@@ -12,21 +12,28 @@ import com.flightright.persistence.model.Member;
 import com.flightright.rest.config.ApplicationProperty;
 import com.flightright.rest.jms.MemberConsumerService;
 import com.flightright.rest.resource.MemberResource;
+import com.flightright.rest.resource.UpdateMemberResource;
 import com.flightright.rest.util.Util;
 import static com.flightright.rest.util.Util.convertObjectToJson;
+import com.flightright.rest.validation.ValidFile;
 import com.flightright.service.FileProcessorService;
 import com.flightright.service.MemberService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
+import javax.validation.Validator;
 import javax.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,15 +41,18 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  *
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
-@RestController("/members")
-@Slf4j
+@RestController
+@RequestMapping("/members")
 @Validated
+@Slf4j
 @Api(value = "Member-Controller", description = "To manage all the endpoints for membership", tags = {"Create Member, Read Member, Update Member, Delete Member"})
 public class MemberController {
     
@@ -58,15 +68,19 @@ public class MemberController {
     @Autowired
     private MemberService memberService;
     
+    @Autowired
+    private Validator validator;
+    
     /**
-     * Creates a new member
+     * Create new member
      * @param request
+     * @param result
      * @return
      * @throws IOException 
      */
     @PostMapping(value = "/create", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Create a new member", notes = "This endpoint manages the cretation of a new member", nickname = "Create Member")
-    public ResponseEntity createMember(@Valid @ModelAttribute MemberResource request) throws IOException {
+    public ResponseEntity createMember(@Valid @ModelAttribute MemberResource request, BindingResult result) throws IOException {
         // save picture
         String fileName = fileProcessorService.storePicture(request.getPicture().getInputStream(), request.getPicture().getOriginalFilename().split("\\."), property.getPicturesFolder());
         if (null == fileName)
@@ -87,7 +101,7 @@ public class MemberController {
      * @param id
      * @return 
      */
-    @GetMapping(value = "/get-member/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(value = "/get/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Get Member", notes = "This endpoint returns a profiled member", nickname = "Get Member By ID")
     public ResponseEntity getMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) {
         Member member = memberService.findMember(id);
@@ -123,23 +137,32 @@ public class MemberController {
         return ResponseEntity.ok(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.SUCCESSFUL.getStatus(), ResponseFormat.SUCCESSFUL.getMessage())));
     }
     
+    
     @PutMapping(value = "/update/{memberId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Update Member", notes = "This endpoint updates the profile of a profiled member", nickname = "Update Member")
-    public ResponseEntity updateMember(@PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id,
-                                       @Valid @ModelAttribute MemberResource request) throws IOException {
+    public ResponseEntity updateMember(@Valid @ModelAttribute UpdateMemberResource request,
+                                       BindingResult result,
+                                       @PathVariable("memberId") @Min(value = 1, message = "Invalid member ID provided") Long id) throws IOException {
         
         Member member = memberService.findMember(id);
         if (null == member)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.MEMBER_DOES_NOT_EXIST.getStatus(), ResponseFormat.MEMBER_DOES_NOT_EXIST.getMessage())));
         
-        // update picture
-        String fileName = fileProcessorService.updatePicture(request.getPicture().getInputStream(), 
-                                                             request.getPicture().getOriginalFilename().split("\\."),
-                                                             new StringBuilder(property.getPicturesFolder()).append("/").append(member.getPicture()).toString(),
-                                                             property.getPicturesFolder());
-        if (null == fileName)
-            return ResponseEntity.badRequest().body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.PICTURE_UPDATE_ERROR.getStatus(), ResponseFormat.PICTURE_UPDATE_ERROR.getMessage())));
-        
+        String fileName = null;
+        if (null != request.getPicture()) {
+            // validate file
+            Set<ConstraintViolation<MultipartFile>> violations = validator.validate(request.getPicture(), ValidFile.class);
+            if (null != violations && !violations.isEmpty())
+                    throw new ConstraintViolationException(violations);
+            
+            // update picture
+            fileName = fileProcessorService.updatePicture(request.getPicture().getInputStream(), 
+                                                                 request.getPicture().getOriginalFilename().split("\\."),
+                                                                 new StringBuilder(property.getPicturesFolder()).append("/").append(member.getPicture()).toString(),
+                                                                 property.getPicturesFolder());
+            if (null == fileName)
+                return ResponseEntity.badRequest().body(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.PICTURE_UPDATE_ERROR.getStatus(), ResponseFormat.PICTURE_UPDATE_ERROR.getMessage())));
+        }
         // send to the queue
         Util.updateMember(member, request, fileName);
         memberConsumerService.updateMember(convertObjectToJson(member));

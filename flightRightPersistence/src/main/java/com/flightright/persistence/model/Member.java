@@ -5,9 +5,8 @@
  */
 package com.flightright.persistence.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.flightright.persistence.serializer.PictureSerializer;
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,12 +14,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Index;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  *
@@ -35,27 +36,36 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Member extends TimestampMapper implements Serializable {
+public class Member implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String firstName;
     
-    @Column(length = 100)
+    @Column(length = 100, nullable = false)
     private String lastName;
     
+    @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private Date dateOfBirth;
     
-    @Column(length = 6)
+    @Column(length = 6, nullable = false)
     private String postalCode;
     
-    @Column(length = 200)
-    @JsonSerialize(using = PictureSerializer.class)
+    @Column(length = 200, nullable = false)
+//    @JsonSerialize(using = PictureSerializer.class)
     private String picture;
+    
+    @Column(name = "createdAt", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    protected Date createdAt;
+    
+    @Column(name = "updatedAt")
+    @Temporal(TemporalType.TIMESTAMP)
+    protected Date updatedAt;
     
     public Member(Builder builder) {
         this.firstName = builder.firstName;
@@ -100,5 +110,13 @@ public class Member extends TimestampMapper implements Serializable {
         public Member build() {
             return new Member(this);
         }
+    }
+    
+    @PrePersist
+    public void dateUpdate() {
+        if (null == updatedAt)
+            this.updatedAt = new Timestamp(System.currentTimeMillis());
+        if (null == createdAt)
+            this.createdAt = new Timestamp(System.currentTimeMillis());
     }
 }

@@ -13,7 +13,6 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,8 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MemberResource {
-    
+public class UpdateMemberResource {
     @ValidName(message = "Please provide the first name of this member")
     private String firstName;
     
@@ -39,6 +37,5 @@ public class MemberResource {
     @ValidPostalCode(message = "Please provide a valid postal code")
     private String postalCode;
     
-    @ValidFile
     private MultipartFile picture;
 }

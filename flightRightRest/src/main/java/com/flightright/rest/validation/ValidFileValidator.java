@@ -26,20 +26,23 @@ public class ValidFileValidator implements ConstraintValidator<ValidFile, Multip
     @Override
     public boolean isValid(MultipartFile t, ConstraintValidatorContext cvc) {
         // do some validation checks
-        if (t.isEmpty() || null == t.getOriginalFilename() || t.getOriginalFilename().trim().isEmpty()) 
+        if (null == t)
             return customMessage(cvc, "Please provide the picture for this member");
         
+        if (t.isEmpty() || null == t.getOriginalFilename() || t.getOriginalFilename().trim().isEmpty()) 
+            return customMessage(cvc, "Please provide the picture for this member");
+
         // ensure that the size does not exceed the maximum size
         if (t.getSize() > property.getMaxPictureSize())
             return customMessage(cvc, new StringBuilder("Maximum allowable picture size exceeded: ").append(property.getMaxPictureSize())
                                                                                                     .append(" bytes").toString());
-        
+
         return validFileExtension(t);
     }
     
     private boolean customMessage(ConstraintValidatorContext cvc, String message) {
         cvc.disableDefaultConstraintViolation();
-            cvc.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+        cvc.buildConstraintViolationWithTemplate(message).addConstraintViolation();
         return false;
     }
     

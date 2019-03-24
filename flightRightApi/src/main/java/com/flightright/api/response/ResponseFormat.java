@@ -17,7 +17,8 @@ public enum ResponseFormat {
     SUCCESSFUL("00", "Successful"),
     PICTURE_ERROR("01", "Unbable to save picture, please try again"),
     MEMBER_DOES_NOT_EXIST("02", "This member does not exist"),
-    PICTURE_UPDATE_ERROR("03", "Unbable to update picture, please try again");
+    PICTURE_UPDATE_ERROR("03", "Unbable to update picture, please try again"),
+    FORMAT_ERROR("04", "This member does not exist");
     
     @Getter
     private final String status;
