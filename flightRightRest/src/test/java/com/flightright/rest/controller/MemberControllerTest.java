@@ -133,6 +133,11 @@ public class MemberControllerTest {
     @Test
     public void when_InvalidInput_thenReturnBadRequest() throws Exception {
         
+        MockMultipartFile mockMultipartFile;
+        MockHttpServletRequestBuilder requestBuilder;
+        MvcResult result;
+        String res;
+        
         // Test Large File Size
         
         /**
@@ -141,29 +146,54 @@ public class MemberControllerTest {
                 "responseMessage": ["Maximum allowable picture size exceeded: 1048576 bytes"]
            }
          */
-        String res = "{\"responseCode\":\"04\",\"responseMessage\":[\"Maximum allowable picture size exceeded: 1048576 bytes\"]}";
+        res = "{\"responseCode\":\"04\",\"responseMessage\":[\"Maximum allowable picture size exceeded: 1048576 bytes\"]}";
         largeImageSize();
         
-        //mock dependencies
-//        when(fileProcessorService.storePicture(any(), any(), any())).thenReturn(FILE_NAME);
-//        doNothing().when(memberConsumerService).saveMember(any());
-        
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
+        mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
                                                             MediaType.IMAGE_JPEG_VALUE, bytes);
         
-         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
+        requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
                                                                         .file(mockMultipartFile)
                                                                         .param("dateOfBirth", "2014-09-06")
                                                                         .param("firstName", "ela333")
                                                                         .param("postalCode", "100212")
                                                                         .param("lastName", "dfdfdfdffdf");
          
-         MvcResult result = mvc.perform(requestBuilder)
+        result = mvc.perform(requestBuilder)
                             .andDo(print())
                             .andExpect(status().isBadRequest())
                             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
                             .andExpect(jsonPath("$.responseCode", Matchers.is("04")))
                             .andExpect(jsonPath("$.responseMessage[0]", Matchers.is("Maximum allowable picture size exceeded: 1048576 bytes"))).andReturn();
+         assertEquals(result.getResponse().getContentAsString(), res);
+         
+         // Test Date of Birth
+        
+        /**
+         * {
+                "responseCode": "04",
+                "responseMessage": ["Maximum allowable picture size exceeded: 1048576 bytes"]
+           }
+         */
+        res = "{\"responseCode\":\"04\",\"responseMessage\":[\"Date of birth must be a past date\"]}";
+        normalImageSize();
+        
+        mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
+                                                            MediaType.IMAGE_JPEG_VALUE, bytes);
+        
+        requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
+                                                                        .file(mockMultipartFile)
+                                                                        .param("dateOfBirth", "2021-09-06")
+                                                                        .param("firstName", "ela333")
+                                                                        .param("postalCode", "100212")
+                                                                        .param("lastName", "dfdfdfdffdf");
+         
+        result = mvc.perform(requestBuilder)
+                            .andDo(print())
+                            .andExpect(status().isBadRequest())
+                            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                            .andExpect(jsonPath("$.responseCode", Matchers.is("04")))
+                            .andExpect(jsonPath("$.responseMessage[0]", Matchers.is("Date of birth must be a past date"))).andReturn();
          assertEquals(result.getResponse().getContentAsString(), res);
     }
     
