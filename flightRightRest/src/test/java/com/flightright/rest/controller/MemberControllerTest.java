@@ -9,6 +9,7 @@ import com.flightright.rest.config.ApplicationProperty;
 import com.flightright.rest.jms.MemberConsumerService;
 import static com.flightright.rest.util.Util.convertObjectToJson;
 import static com.flightright.rest.util.Util.mockMembers;
+import com.flightright.rest.validation.service.ValidationService;
 import com.flightright.service.FileProcessorService;
 import com.flightright.service.MemberService;
 import java.io.IOException;
@@ -31,13 +32,14 @@ import org.springframework.web.context.WebApplicationContext;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
 import static org.junit.Assert.assertEquals;
-import org.junit.Ignore;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -72,7 +74,7 @@ public class MemberControllerTest {
     private MemberService memberService;
     
     @MockBean
-    private Validator validator;
+    private ValidationService validationService;
     
     private static final String FORM_NAME = "picture";
     private static final String FILE_NAME = "cert2.jpg";
@@ -86,7 +88,6 @@ public class MemberControllerTest {
     
     
     @Test
-    @Ignore
     public void when_validMember_thenReturnOk() throws Exception {
         
         /**
@@ -102,12 +103,12 @@ public class MemberControllerTest {
         when(fileProcessorService.storePicture(any(), any(), any())).thenReturn(FILE_NAME);
         doNothing().when(memberConsumerService).saveMember(any());
         
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, bytes);
-        log.info("The size of the image is {}", mockMultipartFile.getSize());
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
+                                                            MediaType.IMAGE_JPEG_VALUE, bytes);
         
          MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
                                                                         .file(mockMultipartFile)
-                                                                        .param("dateOfBirth", "2021-09-06")
+                                                                        .param("dateOfBirth", "2014-09-06")
                                                                         .param("firstName", "ela333")
                                                                         .param("postalCode", "100212")
                                                                         .param("lastName", "dfdfdfdffdf");
@@ -122,6 +123,47 @@ public class MemberControllerTest {
          // verify that the services are called
          verify(fileProcessorService, times(1)).storePicture(any(), any(), any());
          verify(memberConsumerService, times(1)).saveMember(any());
+         assertEquals(result.getResponse().getContentAsString(), res);
+    }
+    
+    /**
+     * Test case for invalid input
+     * @throws Exception 
+     */
+    @Test
+    public void when_InvalidInput_thenReturnBadRequest() throws Exception {
+        
+        // Test Large File Size
+        
+        /**
+         * {
+                "responseCode": "04",
+                "responseMessage": ["Maximum allowable picture size exceeded: 1048576 bytes"]
+           }
+         */
+        String res = "{\"responseCode\":\"04\",\"responseMessage\":[\"Maximum allowable picture size exceeded: 1048576 bytes\"]}";
+        largeImageSize();
+        
+        //mock dependencies
+//        when(fileProcessorService.storePicture(any(), any(), any())).thenReturn(FILE_NAME);
+//        doNothing().when(memberConsumerService).saveMember(any());
+        
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
+                                                            MediaType.IMAGE_JPEG_VALUE, bytes);
+        
+         MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart("/members/create")
+                                                                        .file(mockMultipartFile)
+                                                                        .param("dateOfBirth", "2014-09-06")
+                                                                        .param("firstName", "ela333")
+                                                                        .param("postalCode", "100212")
+                                                                        .param("lastName", "dfdfdfdffdf");
+         
+         MvcResult result = mvc.perform(requestBuilder)
+                            .andDo(print())
+                            .andExpect(status().isBadRequest())
+                            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                            .andExpect(jsonPath("$.responseCode", Matchers.is("04")))
+                            .andExpect(jsonPath("$.responseMessage[0]", Matchers.is("Maximum allowable picture size exceeded: 1048576 bytes"))).andReturn();
          assertEquals(result.getResponse().getContentAsString(), res);
     }
     
@@ -256,6 +298,57 @@ public class MemberControllerTest {
         
         // verify that the services are called
          verify(memberService, times(1)).findMember(any());
+         assertEquals(result.getResponse().getContentAsString(), res);
+    }
+    
+    /**
+     * Test case to update member
+     * @throws Exception 
+     */
+    @Test
+    public void when_updateMember_thenReturnOk() throws Exception {
+        /**
+         * {
+                "responseCode": "00",
+                "responseMessage": "Successful"
+           }
+         */
+        String res = "{\"responseCode\":\"00\",\"responseMessage\":\"Successful\"}";
+        normalImageSize();
+        
+        //mock dependencies
+        when(property.getPicturesFolder()).thenReturn("c:/flightright/members/pictures");
+        when(memberService.findMember(any())).thenReturn(mockMembers().get(0));
+        when(fileProcessorService.updatePicture(any(), any(), any(), any())).thenReturn(FILE_NAME);
+        when(validationService.validatePicture(any(), any())).thenReturn(null);
+        doNothing().when(memberConsumerService).updateMember(any());
+        
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FORM_NAME, FILE_NAME,
+                                                            MediaType.IMAGE_JPEG_VALUE, bytes);
+        
+        MockMultipartHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.multipart("/members/update/1");
+        requestBuilder.with((MockHttpServletRequest request) -> {
+            request.setMethod("PUT");
+            return request;
+        });
+         MockHttpServletRequestBuilder request = requestBuilder.file(mockMultipartFile)
+                                                            .param("dateOfBirth", "2014-09-06")
+                                                            .param("firstName", "ela333")
+                                                            .param("postalCode", "100212")
+                                                            .param("lastName", "dfdfdfdffdf");
+         
+         MvcResult result = mvc.perform(request)
+                            .andDo(print())
+                            .andExpect(status().isOk())
+                            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                            .andExpect(jsonPath("$.responseCode", Matchers.is("00")))
+                            .andExpect(jsonPath("$.responseMessage", Matchers.is("Successful"))).andReturn();
+         
+         // verify that the services are called
+         verify(memberService, times(1)).findMember(any());
+         verify(fileProcessorService, times(1)).updatePicture(any(), any(), any(), any());
+         verify(memberConsumerService, times(1)).updateMember(any());
+         verify(validationService, times(1)).validatePicture(any(), any());
          assertEquals(result.getResponse().getContentAsString(), res);
     }
     

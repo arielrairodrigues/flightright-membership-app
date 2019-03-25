@@ -23,11 +23,9 @@ import io.swagger.annotations.ApiOperation;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import static java.util.stream.Collectors.toList;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
-import javax.validation.Validator;
 import javax.validation.groups.Default;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,13 +43,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import com.flightright.rest.validation.service.ValidationService;
 
 /**
  *
  * @author Megafu Charles <noniboycharsy@gmail.com>
  */
 @RestController
-//@Validated(value = {Default.class})
+@Validated(value = {Default.class})
 @RequestMapping("/members")
 @Slf4j
 @Api(value = "Member-Controller", description = "To manage all the endpoints for membership", tags = {"Create Member, Read Member, Update Member, Delete Member"})
@@ -70,7 +69,7 @@ public class MemberController {
     private MemberService memberService;
     
     @Autowired
-    private Validator validator;
+    private ValidationService validationService;
     
     /**
      * Create new member
@@ -153,7 +152,7 @@ public class MemberController {
         String fileName = null;
         if (null != request.getPicture()) {
             // validate file
-            Set<ConstraintViolation<MultipartFile>> violations = validator.validate(request.getPicture(), ValidFile.class);
+            Set<ConstraintViolation<MultipartFile>> violations = validationService.validatePicture(request.getPicture(), ValidFile.class);
             if (null != violations && !violations.isEmpty())
                     throw new ConstraintViolationException(violations);
             

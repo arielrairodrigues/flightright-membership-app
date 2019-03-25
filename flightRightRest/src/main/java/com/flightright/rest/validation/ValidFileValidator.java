@@ -9,6 +9,7 @@ import com.flightright.rest.config.ApplicationProperty;
 import static com.flightright.rest.util.Util.validFileExtension;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -17,11 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
  */
 public class ValidFileValidator implements ConstraintValidator<ValidFile, MultipartFile> {
     
-    private final ApplicationProperty property;
-    
-    public ValidFileValidator(ApplicationProperty property) {
-        this.property = property;
-    }
+    @Value("${flightright.max-picture-size}")
+    private long maxPictureSize;
 
     @Override
     public boolean isValid(MultipartFile t, ConstraintValidatorContext cvc) {
@@ -33,8 +31,8 @@ public class ValidFileValidator implements ConstraintValidator<ValidFile, Multip
             return customMessage(cvc, "Please provide the picture for this member");
 
         // ensure that the size does not exceed the maximum size
-        if (t.getSize() > property.getMaxPictureSize())
-            return customMessage(cvc, new StringBuilder("Maximum allowable picture size exceeded: ").append(property.getMaxPictureSize())
+        if (t.getSize() > maxPictureSize)
+            return customMessage(cvc, new StringBuilder("Maximum allowable picture size exceeded: ").append(maxPictureSize)
                                                                                                     .append(" bytes").toString());
 
         return validFileExtension(t);
