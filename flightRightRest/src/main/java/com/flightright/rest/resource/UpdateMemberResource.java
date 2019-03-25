@@ -5,11 +5,10 @@
  */
 package com.flightright.rest.resource;
 
-import com.flightright.rest.validation.ValidDateOfBirth;
-import com.flightright.rest.validation.ValidFile;
-import com.flightright.rest.validation.ValidName;
-import com.flightright.rest.validation.ValidPostalCode;
 import java.util.Date;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,17 +23,19 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateMemberResource {
-    @ValidName(message = "Please provide the first name of this member")
+    
+    @Pattern(regexp = "[a-zA-Z0-9\\-, ]+", message = "Please provide the first name of this member")
     private String firstName;
     
-    @ValidName(message = "Please provide the last name of this member")
+    @Pattern(regexp = "[a-zA-Z0-9\\-, ]+", message = "Please provide the last name of this member")
     private String lastName;
     
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    @ValidDateOfBirth
+    @NotNull(message = "Please enter the date of birth for this member")
+    @Past(message = "Date of birth must be a past date")
     private Date dateOfBirth;
     
-    @ValidPostalCode(message = "Please provide a valid postal code")
+    @Pattern(regexp = "^\\d{6}$", message = "Please enter a valid postal code")
     private String postalCode;
     
     private MultipartFile picture;

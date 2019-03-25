@@ -9,13 +9,13 @@ import com.flightright.api.response.ApiResponseFactory;
 import com.flightright.api.response.ResponseFactory;
 import com.flightright.api.response.ResponseFormat;
 import java.util.Date;
-import java.util.List;
-import static java.util.stream.Collectors.toList;
+import java.util.Set;
+import static java.util.stream.Collectors.toSet;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import static org.apache.activemq.util.ThreadTracker.result;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -32,12 +32,13 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public final ResponseEntity handleGlobalException(Exception ex, WebRequest request) {
       
-//      if (ex instanceof ConstraintViolationException) {
-//          Set<ConstraintViolation<?>> constraintViolation = ((ConstraintViolationException) ex).getConstraintViolations();
-//          Set<String> errors = constraintViolation.stream().map(v -> v.getMessage()).collect(toSet());
-//          return new ResponseEntity<>(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.FORMAT_ERROR.getStatus(), errors)), HttpStatus.BAD_REQUEST);
-////          return new ResponseEntity<>(new ErrorDetail(new Date(), "Invalid Parameter(s) Provided", errors), HttpStatus.BAD_REQUEST);
-//      } 
+      if (ex instanceof ConstraintViolationException) {
+          Set<ConstraintViolation<?>> constraintViolation = ((ConstraintViolationException) ex).getConstraintViolations();
+          Set<String> errors = constraintViolation.stream().map(v -> v.getMessage()).collect(toSet());
+          return new ResponseEntity<>(ResponseFactory.createResponse(new ApiResponseFactory(ResponseFormat.FORMAT_ERROR.getStatus(), errors)), HttpStatus.BAD_REQUEST);
+//          return new ResponseEntity<>(new ErrorDetail(new Date(), "Invalid Parameter(s) Provided", errors), HttpStatus.BAD_REQUEST);
+      }
+      
       log.error("Exception occurred", ex);
       return new ResponseEntity<>(new ErrorDetail(new Date(), ex.getMessage(), request.getDescription(false)), HttpStatus.BAD_GATEWAY);
     }
