@@ -18,6 +18,8 @@ To view the swagger documentation, visit `http://localhost:8080/swagger-ui.html`
 
 The API provides the following interfaces and can be tested using tools like PostMan
 
+You can click here to see various screenshots for the RESTful API methods
+
 ### Create Member
 **POST http://localhost:8080/members/create**
 
@@ -28,9 +30,89 @@ Accept: application/json (or application/xml)
 Body (Note that the body must be form data because of the file upload)
 
 ### Parameter Names
-> picture
+> picture (file)
 > dateOfBirth
 > firstName
 > lastName
 > postalCode
+```
+
+Create Member Response:
+```
+Code: 200
+Body: {"responseCode":"00","responseMessage":"Successful"}
+```
+
+### Update Member
+**POST http://localhost:8080/members/update/{memberId}**
+
+Request:
+```
+Headers:
+Accept: application/json (or application/xml)
+Body (Note that the body must be form data because of the file upload)
+
+### Parameter Names
+> picture (file)
+> dateOfBirth
+> firstName
+> lastName
+> postalCode
+```
+
+Update Member Response:
+```
+Code: 200
+Body: {"responseCode":"00","responseMessage":"Successful"}
+```
+
+### Get Member
+**POST http://localhost:8080/members/get/{memberId}**
+
+Request:
+```
+Headers:
+Accept: application/json (or application/xml)
+```
+
+Get Member Response:
+```
+Code: 200
+Body: { "id": 1, "firstName": "ela333", "lastName": "dfdfdfdffdf", "dateOfBirth": "2014-09-06", "postalCode": "100212", "picture": "cert2_nkRPFsgAdocb.jpg", "createdAt": "2019-03-26T18:58:13.885+0000", "updatedAt": "2019-03-26T18:58:13.885+0000" }
+```
+
+### Get Members
+**POST http://localhost:8080/members/**
+
+Request:
+```
+Headers:
+Accept: application/json (or application/xml)
+```
+
+Get Members Response:
+```
+Code: 200
+Body: [ { "id": 1, "firstName": "ela333", "lastName": "dfdfdfdffdf", "dateOfBirth": "2014-09-06", "postalCode": "100212", "picture": "cert2_nkRPFsgAdocb.jpg", "createdAt": "2019-03-26T18:58:13.885+0000", "updatedAt": "2019-03-26T18:58:13.885+0000" } ]
+```
+
+### Delete Member
+**POST http://localhost:8080/members/delete/{memberId}**
+
+Request:
+```
+Headers:
+Accept: application/json (or application/xml)
+```
+
+Delete Members Response:
+```
+Code: 200
+Body: { "responseCode": "00", "responseMessage": "Successful" }
+```
+
+## How to test it
+
+To verify if it's correctly working you can use postman to test each of the endpoints. To see screenshots please click here [**https://drive.google.com/file/d/1uRSlgMVCfVtYV86fZqJ7PTq-nquMTg68/view?usp=sharing**]:
+
 
