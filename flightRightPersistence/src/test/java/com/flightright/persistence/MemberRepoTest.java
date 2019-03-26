@@ -6,6 +6,7 @@
 package com.flightright.persistence;
 
 import com.flightright.persistence.model.Member;
+import com.flightright.persistence.repo.MemberRepo;
 import static com.flightright.persistence.util.Util.mockMember;
 import javax.persistence.PersistenceException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ public class MemberRepoTest {
     
     @Autowired
     private TestEntityManager testEntityManager;
+    @Autowired 
+    private MemberRepo memberRepo;
     
     /**
      * Test case for save member
@@ -44,9 +47,28 @@ public class MemberRepoTest {
         assertEquals(member.getId(), 1L);
     }
     
+    /**
+     * Test NULL values
+     * @throws Exception 
+     */
     @Test(expected = PersistenceException.class)
     public void when_saveMemberWithNullValues_thenThrowException() throws Exception {
         testEntityManager.persist(new Member());
         fail("Persistence Exception should have been thrown");
+    }
+    
+    /**
+     * Test find member by ID
+     * @throws Exception 
+     */
+    @Test
+    public void when_findMemberById_thenReturnMember() throws Exception {
+        Member member = testEntityManager.persist(mockMember());
+        assertNotNull(member);
+        assertEquals(member.getId(), 2L);
+        
+        Member getMember = memberRepo.findById(2L).orElseGet(() -> null);
+        assertNotNull(getMember);
+        assertEquals(getMember.getFirstName(), mockMember().getFirstName());
     }
 }
