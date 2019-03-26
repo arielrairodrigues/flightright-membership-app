@@ -14,3 +14,23 @@ The project will be automatically exposed to the part `http://localhost:8080/`
 
 To view the swagger documentation, visit `http://localhost:8080/swagger-ui.html`
 
+## RESTful API
+
+The API provides the following interfaces and can be tested using tools like PostMan
+
+### Create Member
+**POST http://localhost:8080/members/create**
+
+Request:
+```
+Headers:
+Accept: application/json (or application/xml)
+Body (Note that the body must be form data because of the file upload)
+
+### Parameter Names
+> picture
+> dateOfBirth
+> firstName
+> lastName
+> postalCode
+
