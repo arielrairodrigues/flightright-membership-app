@@ -6,9 +6,10 @@
 package com.flightright.persistence.util;
 
 import com.flightright.persistence.model.Member;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import static java.util.stream.Collectors.toList;
+import java.util.stream.Stream;
 
 /**
  *
@@ -36,8 +37,8 @@ public final class Util {
      */
     public static List<Member> mockMembers() {
         Member member = new Member(1L, "Nonso", "Megafu", new Date(), "100212", "picture.jgp", new Date(), new Date());
-        List<Member> members = new ArrayList<>();
-        members.add(member);
-        return members;
+        Member memberTwo = new Member(2L, "Nonso2", "Megafu2", new Date(), "100212", "picture2.jgp", new Date(), new Date());
+        
+        return Stream.of(member, memberTwo).collect(toList());
     }
 }

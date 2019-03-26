@@ -12,7 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import static org.hamcrest.Matchers.startsWith;
-import org.junit.After;
+import org.junit.AfterClass;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -92,8 +92,8 @@ public class FileProcessorServiceTest {
     /**
      * Clean up after testing
      */
-    @After
-    public void cleanUp() {
+    @AfterClass
+    public static void cleanUp() {
         String file = null;
         try {
             Files.list(Paths.get(PICTURE_PATH)).filter(Files::isRegularFile).forEach(f -> {
