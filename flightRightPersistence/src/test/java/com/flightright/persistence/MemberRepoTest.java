@@ -43,4 +43,10 @@ public class MemberRepoTest {
         assertNotNull(member);
         assertEquals(member.getId(), 1L);
     }
+    
+    @Test(expected = PersistenceException.class)
+    public void when_saveMemberWithNullValues_thenThrowException() throws Exception {
+        testEntityManager.persist(new Member());
+        fail("Persistence Exception should have been thrown");
+    }
 }
