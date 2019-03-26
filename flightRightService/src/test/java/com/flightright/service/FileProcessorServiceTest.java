@@ -66,6 +66,21 @@ public class FileProcessorServiceTest {
         assertTrue(Files.exists(Paths.get(PICTURE_PATH, updatedFileName)));
     }
     
+    /**
+     * Delete Picture Test case
+     * @throws Exception 
+     */
+    @Test
+    public void when_deletePicture_thenDoNothing() throws Exception {
+        // save file
+        String fileName = savePicture();
+        
+        // delete the picture
+        fileProcessorService.deletePicture(new StringBuilder(PICTURE_PATH).append("/")
+                                            .append(fileName).toString());
+        assertFalse(Files.exists(Paths.get(PICTURE_PATH, fileName)));
+    }
+    
     private String savePicture() {
         String fileName = fileProcessorService.storePicture(is, new String[]{FILE_NAME, FILE_EXTENSION}, PICTURE_PATH);
         assertNotNull(fileName);
