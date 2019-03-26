@@ -115,7 +115,7 @@ public class MemberController {
      * Gets all members profiled in the system
      * @return 
      */
-    @GetMapping(value = "/", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
+    @GetMapping(produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     @ApiOperation(value = "Get All Members", notes = "This endpoint returns all the memnbers profiled in the system", nickname = "Get All Members")
     public List<Member> getAllMembers() {
         return memberService.findAll();
