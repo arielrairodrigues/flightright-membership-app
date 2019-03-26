@@ -57,7 +57,7 @@ public class FileProcessorServiceImpl implements FileProcessorService{
     public String updatePicture(InputStream file, String[] fileDetails, String oldFileName, String picturePath) {
         String fileName = renameFile(fileDetails);
         try {
-            Path path = Paths.get(oldFileName);
+            Path path = Paths.get(picturePath, oldFileName);
             Files.deleteIfExists(path);
             return saveImage(file, fileName, picturePath);
         } catch (IOException e) {

@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import lombok.extern.slf4j.Slf4j;
 import static org.hamcrest.Matchers.startsWith;
 import org.junit.After;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class FileProcessorServiceTest {
     
     private FileProcessorService fileProcessorService;
     private InputStream is;
-    private static final String PICTURE_PATH = "c:/flightright/members/pictures";
+    private static final String PICTURE_PATH = "c:/flightright/members/test/pictures";
     private static final String FILE_NAME = "test_file";
     private static final String FILE_EXTENSION = "jpg";
     
@@ -45,9 +45,33 @@ public class FileProcessorServiceTest {
      */
     @Test
     public void when_storePicture_thenReturnFileName() throws Exception {
+        savePicture();
+    }
+    
+    /**
+     * Test case for update member picture
+     * @throws Exception 
+     */
+    @Test
+    public void when_updatePicture_thenReturnFileName() throws Exception {
+        // save file
+        String fileName = savePicture();
+        String updateFileName = "update_test_file";
+        // update 
+        String updatedFileName = fileProcessorService.updatePicture(is, new String[]{updateFileName, FILE_EXTENSION}, fileName, PICTURE_PATH);
+        
+        assertNotNull(updatedFileName);
+        assertThat(updatedFileName, startsWith(updateFileName));
+        assertFalse(Files.exists(Paths.get(PICTURE_PATH, fileName)));
+        assertTrue(Files.exists(Paths.get(PICTURE_PATH, updatedFileName)));
+    }
+    
+    private String savePicture() {
         String fileName = fileProcessorService.storePicture(is, new String[]{FILE_NAME, FILE_EXTENSION}, PICTURE_PATH);
         assertNotNull(fileName);
         assertThat(fileName, startsWith(FILE_NAME));
+        assertTrue(Files.exists(Paths.get(PICTURE_PATH, fileName)));
+        return fileName;
     }
     
     /**
@@ -57,8 +81,13 @@ public class FileProcessorServiceTest {
     public void cleanUp() {
         String file = null;
         try {
-            file = new StringBuilder(PICTURE_PATH).append("/cert2.jpg").toString();
-            Files.deleteIfExists(Paths.get(file));
+            Files.list(Paths.get(PICTURE_PATH)).filter(Files::isRegularFile).forEach(f -> {
+                try {
+                    Files.deleteIfExists(f);
+                } catch (IOException ex) {
+                    log.error("Unable to delete the file {}", f, ex);
+                }
+            });
         } catch (IOException ex) {
             log.error("Unable to delete the file {} after testing", file, ex);
         }
