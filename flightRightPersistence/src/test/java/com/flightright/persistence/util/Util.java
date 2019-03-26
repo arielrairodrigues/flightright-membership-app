@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.flightright.service.util;
+package com.flightright.persistence.util;
 
 import com.flightright.persistence.model.Member;
 import java.util.ArrayList;
