@@ -44,7 +44,7 @@ Body: {"responseCode":"00","responseMessage":"Successful"}
 ```
 
 ### Update Member
-**POST http://localhost:8080/members/update/{memberId}**
+**PUT http://localhost:8080/members/update/{memberId}**
 
 Request:
 ```
@@ -67,7 +67,7 @@ Body: {"responseCode":"00","responseMessage":"Successful"}
 ```
 
 ### Get Member
-**POST http://localhost:8080/members/get/{memberId}**
+**GET http://localhost:8080/members/get/{memberId}**
 
 Request:
 ```
@@ -82,7 +82,7 @@ Body: { "id": 1, "firstName": "ela333", "lastName": "dfdfdfdffdf", "dateOfBirth"
 ```
 
 ### Get Members
-**POST http://localhost:8080/members**
+**GET http://localhost:8080/members**
 
 Request:
 ```
@@ -97,7 +97,7 @@ Body: [ { "id": 1, "firstName": "ela333", "lastName": "dfdfdfdffdf", "dateOfBirt
 ```
 
 ### Delete Member
-**POST http://localhost:8080/members/delete/{memberId}**
+**DELETE http://localhost:8080/members/delete/{memberId}**
 
 Request:
 ```
