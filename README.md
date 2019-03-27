@@ -82,7 +82,7 @@ Body: { "id": 1, "firstName": "ela333", "lastName": "dfdfdfdffdf", "dateOfBirth"
 ```
 
 ### Get Members
-**POST http://localhost:8080/members/**
+**POST http://localhost:8080/members**
 
 Request:
 ```
